@@ -1229,7 +1229,7 @@
   border-right: 1px solid #000;
   float: left;
   height: 24px;
-  padding: 3px 12px 3px 13px;
+  padding: 3px 0px 3px 10px;
   width: 20px;
 }
 #option-tree-header li#option-tree-logo:hover {
@@ -1740,8 +1740,8 @@ div.option-tree-ui-media-wrap {
   padding: 4px;
   display: block;
   float: left;
-  max-width: 100%;
-  height: auto;
+  width: auto;
+  max-height: 150px;
   -ms-interpolation-mode: bicubic;
   -webkit-border-radius: 2px;
      -moz-border-radius: 2px;
@@ -2328,6 +2328,7 @@ select.option-tree-ui-select option {
   -webkit-border-radius: 2px;
      -moz-border-radius: 2px;
           border-radius: 2px;
+  width:64px;
 }
 .type-radio-image .option-tree-ui-radio-images img.option-tree-ui-radio-image-selected,
 .type-radio-image .option-tree-ui-radio-images img:hover {
@@ -3882,6 +3883,16 @@ a.ui-datepicker-next {
   width: 100%;
 }
 
+#side-sortables .format-setting .description,
+#side-sortables .format-setting .format-setting-inner {
+  float: none;
+  padding: 5px 0 15px;
+  width: 100%;
+}
+
+#side-sortables .format-setting .format-setting-inner .select-wrapper {
+  width: 100%;
+}
 /* -------------------------------------------------- 
   :: Metabox Tabs for Small Screens & Mobile Devices
   ---------------------------------------------------*/

@@ -220,7 +220,7 @@ if ( ! function_exists( 'ot_load_dynamic_css' ) ) {
     
     /* don't load in the admin */
     if ( is_admin() ) {
-      return;
+//      return;
     }
 
     /**
@@ -245,6 +245,8 @@ if ( ! function_exists( 'ot_load_dynamic_css' ) ) {
       $ot_css_file_paths = get_blog_option( get_current_blog_id(), 'ot_css_file_paths', $ot_css_file_paths );
     }
 
+    $ot_css_file_paths = apply_filters( 'ot_css_option_file_path', $ot_css_file_paths );
+
     if ( ! empty( $ot_css_file_paths ) ) {
       
       $last_css = '';
@@ -254,7 +256,7 @@ if ( ! function_exists( 'ot_load_dynamic_css' ) ) {
         
         if ( '' != $path && file_exists( $path ) ) {
         
-          $parts = explode( '/wp-content', $path );
+          $parts = explode( '/app', $path );
 
           if ( isset( $parts[1] ) ) {
 
@@ -391,6 +393,72 @@ if ( ! function_exists( 'ot_register_theme_options_admin_bar_menu' ) ) {
     
   }
   
+}
+
+if ( ! function_exists( 'ot_recognized_postal_region_code' ) ) {
+  function ot_recognized_postal_region_code($state_name)
+  {
+    $states = array(
+        strtoupper(__('Alabama', 'option-tree')) => 'AL',
+        strtoupper(__('Alaska', 'option-tree')) => 'AK',
+        strtoupper(__('Arizona', 'option-tree')) => 'AZ',
+        strtoupper(__('Arkansas', 'option-tree')) => 'AR',
+        strtoupper(__('California', 'option-tree')) => 'CA',
+        strtoupper(__('Colorado', 'option-tree')) => 'CO',
+        strtoupper(__('Connecticut', 'option-tree')) => 'CT',
+        strtoupper(__('Delaware', 'option-tree')) => 'DE',
+        strtoupper(__('District of Columbia', 'option-tree')) => 'DC',
+        strtoupper(__('Florida', 'option-tree')) => 'FL',
+        strtoupper(__('Georgia', 'US State', 'option-tree')) => 'GA',
+        strtoupper(__('Hawaii', 'option-tree')) => 'HI',
+        strtoupper(__('Idaho', 'option-tree')) => 'ID',
+        strtoupper(__('Illinois', 'option-tree')) => 'IL',
+        strtoupper(__('Indiana', 'option-tree')) => 'IN',
+        strtoupper(__('Iowa', 'option-tree')) => 'IA',
+        strtoupper(__('Kansas', 'option-tree')) => 'KS',
+        strtoupper(__('Kentucky', 'option-tree')) => 'KY',
+        strtoupper(__('Louisiana', 'option-tree')) => 'LA',
+        strtoupper(__('Maine', 'option-tree')) => 'ME',
+        strtoupper(__('Maryland', 'option-tree')) => 'MD',
+        strtoupper(__('Massachusetts', 'option-tree')) => 'MA',
+        strtoupper(__('Michigan', 'option-tree')) => 'MI',
+        strtoupper(__('Minnesota', 'option-tree')) => 'MN',
+        strtoupper(__('Mississippi', 'option-tree')) => 'MS',
+        strtoupper(__('Missouri', 'option-tree')) => 'MO',
+        strtoupper(__('Montana', 'option-tree')) => 'MT',
+        strtoupper(__('Nebraska', 'option-tree')) => 'NE',
+        strtoupper(__('Nevada', 'option-tree')) => 'NV',
+        strtoupper(__('New Hampshire', 'option-tree')) => 'NH',
+        strtoupper(__('New Jersey', 'option-tree')) => 'NJ',
+        strtoupper(__('New Mexico', 'option-tree')) => 'NM',
+        strtoupper(__('New York', 'option-tree')) => 'NY',
+        strtoupper(__('North Carolina', 'option-tree')) => 'NC',
+        strtoupper(__('North Dakota', 'option-tree')) => 'ND',
+        strtoupper(__('Ohio', 'option-tree')) => 'OH',
+        strtoupper(__('Oklahoma', 'option-tree')) => 'OK',
+        strtoupper(__('Oregon', 'option-tree')) => 'OR',
+        strtoupper(__('Pennsylvania', 'option-tree')) => 'PA',
+        strtoupper(__('Rhode Island', 'option-tree')) => 'RI',
+        strtoupper(__('South Carolina', 'option-tree')) => 'SC',
+        strtoupper(__('South Dakota', 'option-tree')) => 'SD',
+        strtoupper(__('Tennessee', 'option-tree')) => 'TN',
+        strtoupper(__('Texas', 'option-tree')) => 'TX',
+        strtoupper(__('Utah', 'option-tree')) => 'UT',
+        strtoupper(__('Vermont', 'option-tree')) => 'VT',
+        strtoupper(__('Virginia', 'option-tree')) => 'VA',
+        strtoupper(__('Washington', 'option-tree')) => 'WA',
+        strtoupper(__('West Virginia', 'option-tree')) => 'WV',
+        strtoupper(__('Wisconsin', 'option-tree')) => 'WI',
+        strtoupper(__('Wyoming', 'option-tree')) => 'WY',
+        strtoupper(__('Armed Forces Americas', 'option-tree')) => 'AA',
+        strtoupper(__('Armed Forces Europe', 'option-tree')) => 'AE',
+        strtoupper(__('Armed Forces Pacific', 'option-tree')) => 'AP',
+    );
+
+    $code = isset($states[strtoupper($state_name)]) ? $states[strtoupper($state_name)] : strtoupper($state_name);
+
+    return $code;
+  }
 }
 
 /* End of file ot-functions.php */

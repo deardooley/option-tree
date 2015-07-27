@@ -599,7 +599,7 @@ if ( ! class_exists( 'OT_Loader' ) ) {
         }
         #adminmenu #toplevel_page_ot-settings .menu-icon-generic div.wp-menu-image:before,
         #option-tree-header #option-tree-logo a:before {
-          content: "\e785";
+          content: "\f0eb";
         }
         #option-tree-header #option-tree-logo a:before {
           font-size: 20px !important;

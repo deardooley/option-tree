@@ -679,7 +679,36 @@ if ( ! function_exists( 'ot_validate_setting' ) ) {
       if ( empty( $input ) ) {
         $input = '';
       }
-      
+
+    } else if ( 'phone-number' == $type ) {
+
+      // Loop over array and set error keys or unset key from array.
+      foreach( $input as $key => $value ) {
+        if ( ! empty( $value ) && ! is_numeric( $value ) && $key !== 'type' ) {
+          $errors[] = $key;
+        }
+        if ( empty( $value ) && strlen( $value ) == 0 ) {
+          unset( $input[$key] );
+        }
+      }
+
+      /* return 0 & set error */
+      if ( isset( $errors ) ) {
+
+        foreach( $errors as $error ) {
+
+          $input[$error] = '0';
+
+          add_settings_error( 'option-tree', 'invalid_phone_number_' . $error, sprintf( __( 'The %s input field for %s only allows numeric values.', 'option-tree' ), '<code>' . $error . '</code>', '<code>' . $field_id . '</code>' ), 'error' );
+
+        }
+
+      }
+
+      if ( empty( $input ) ) {
+        $input = '';
+      }
+
     } else if ( 'typography' == $type && isset( $input['font-color'] ) ) {
       
       $input['font-color'] = ot_validate_setting( $input['font-color'], 'colorpicker', $field_id );
@@ -2429,6 +2458,7 @@ if ( ! function_exists( 'ot_option_types_array' ) ) {
       'dimension'                 => __('Dimension', 'option-tree'),
       'gallery'                   => __('Gallery', 'option-tree'),
       'google-fonts'              => __('Google Fonts', 'option-tree'),
+      'gravityforms-select'       => __('GravityForms Select', 'option-tree'),
       'javascript'                => __('JavaScript', 'option-tree'),
       'link-color'                => __('Link Color', 'option-tree'),
       'list-item'                 => __('List Item', 'option-tree'),
@@ -2437,6 +2467,8 @@ if ( ! function_exists( 'ot_option_types_array' ) ) {
       'on-off'                    => __('On/Off', 'option-tree'),
       'page-checkbox'             => __('Page Checkbox', 'option-tree'),
       'page-select'               => __('Page Select', 'option-tree'),
+      'phone-number'              => __('Phone Number', 'option-tree'),
+      'postal-address'            => __('Postal Address', 'option-tree'),
       'post-checkbox'             => __('Post Checkbox', 'option-tree'),
       'post-select'               => __('Post Select', 'option-tree'),
       'radio'                     => __('Radio', 'option-tree'),
@@ -2564,21 +2596,22 @@ add_filter( 'ot_recognized_font_families', 'ot_google_font_stack', 1, 2 );
  */
 if ( ! function_exists( 'ot_recognized_font_families' ) ) {
 
-  function ot_recognized_font_families( $field_id = '' ) {
-    
+  function ot_recognized_font_families($field_id = '')
+  {
+
     $families = array(
-      'arial'     => 'Arial',
-      'georgia'   => 'Georgia',
-      'helvetica' => 'Helvetica',
-      'palatino'  => 'Palatino',
-      'tahoma'    => 'Tahoma',
-      'times'     => '"Times New Roman", sans-serif',
-      'trebuchet' => 'Trebuchet',
-      'verdana'   => 'Verdana'
+        'arial' => 'Arial',
+        'georgia' => 'Georgia',
+        'helvetica' => 'Helvetica',
+        'palatino' => 'Palatino',
+        'tahoma' => 'Tahoma',
+        'times' => '"Times New Roman", sans-serif',
+        'trebuchet' => 'Trebuchet',
+        'verdana' => 'Verdana'
     );
-    
-    return apply_filters( 'ot_recognized_font_families', $families, $field_id );
-    
+
+    return apply_filters('ot_recognized_font_families', $families, $field_id);
+
   }
 
 }
@@ -2986,6 +3019,33 @@ if ( ! function_exists( 'ot_recognized_border_unit_types' ) ) {
       '%'  => '%',
       'em' => 'em',
       'pt' => 'pt'
+    ), $field_id );
+
+  }
+
+}
+
+/**
+ * Border Units
+ *
+ * Returns an array of all available unit types.
+ *
+ * @uses      apply_filters()
+ *
+ * @return    array
+ *
+ * @access    public
+ * @since     2.5.0
+ */
+if ( ! function_exists( 'ot_recognized_phone_number_types' ) ) {
+
+  function ot_recognized_phone_number_types( $field_id = '' ) {
+
+    return apply_filters( 'ot_recognized_phone_number_types', array(
+        'office' => 'Office',
+        'mobile'  => 'Mobile',
+        'home' => 'Home',
+        'other' => 'Other'
     ), $field_id );
 
   }
@@ -3761,6 +3821,7 @@ if ( ! function_exists( 'ot_insert_css_with_markers' ) ) {
 
       // Can't write to the file return false
       if ( ! $f = ot_file_open( $filepath, 'w' ) ) {
+        add_settings_error( 'option-tree', 'dynamic_css', sprintf( __( 'Unable to write to file %s.', 'option-tree' ), '<code>' . $filepath . '</code>' ), 'error' );
         return false;
       }
 
@@ -6118,6 +6179,91 @@ function ot_split_shared_term( $term_id, $new_term_id, $term_taxonomy_id, $taxon
 
 }
 add_action( 'split_shared_term', 'ot_split_shared_term', 10, 4 );
+
+
+/**
+ * Recognized states
+ *
+ * Returns an array of all recognized postal regions.
+ * By default this is all US states, but can be overridden
+ * by the filter of the same name.
+ *
+ * @uses      apply_filters()
+ *
+ * @return    array
+ *
+ * @access    public
+ * @since     2.0
+ */
+if ( ! function_exists( 'ot_recognized_postal_regions' ) ) {
+  function ot_recognized_postal_regions($field_id = '')
+  {
+    return apply_filters('ot_recognized_postal_regions', array(
+        __('Alabama', 'option-tree'), __('Alaska', 'option-tree'), __('Arizona', 'option-tree'), __('Arkansas', 'option-tree'),
+        __('California', 'option-tree'), __('Colorado', 'option-tree'), __('Connecticut', 'option-tree'), __('Delaware', 'option-tree'),
+        __('District of Columbia', 'option-tree'), __('Florida', 'option-tree'), _x('Georgia', 'US State', 'option-tree'),
+        __('Hawaii', 'option-tree'), __('Idaho', 'option-tree'), __('Illinois', 'option-tree'), __('Indiana', 'option-tree'),
+        __('Iowa', 'option-tree'), __('Kansas', 'option-tree'), __('Kentucky', 'option-tree'), __('Louisiana', 'option-tree'),
+        __('Maine', 'option-tree'), __('Maryland', 'option-tree'), __('Massachusetts', 'option-tree'), __('Michigan', 'option-tree'),
+        __('Minnesota', 'option-tree'), __('Mississippi', 'option-tree'), __('Missouri', 'option-tree'), __('Montana', 'option-tree'),
+        __('Nebraska', 'option-tree'), __('Nevada', 'option-tree'), __('New Hampshire', 'option-tree'), __('New Jersey', 'option-tree'),
+        __('New Mexico', 'option-tree'), __('New York', 'option-tree'), __('North Carolina', 'option-tree'),
+        __('North Dakota', 'option-tree'), __('Ohio', 'option-tree'), __('Oklahoma', 'option-tree'), __('Oregon', 'option-tree'),
+        __('Pennsylvania', 'option-tree'), __('Rhode Island', 'option-tree'), __('South Carolina', 'option-tree'),
+        __('South Dakota', 'option-tree'), __('Tennessee', 'option-tree'), __('Texas', 'option-tree'), __('Utah', 'option-tree'),
+        __('Vermont', 'option-tree'), __('Virginia', 'option-tree'), __('Washington', 'option-tree'), __('West Virginia', 'option-tree'),
+        __('Wisconsin', 'option-tree'), __('Wyoming', 'option-tree'), __('Armed Forces Americas', 'option-tree'),
+        __('Armed Forces Europe', 'option-tree'), __('Armed Forces Pacific', 'option-tree'),
+    ),
+        $field_id);
+  }
+}
+
+/**
+ * Recognized countries
+ *
+ * Returns an array of all recognized countries as identified
+ * by their postal name. This is a static list, but can be
+ * overridden by the filter of the same name.
+ *
+ * @uses      apply_filters()
+ *
+ * @return    array
+ *
+ * @access    public
+ * @since     2.0
+ */
+if ( ! function_exists( 'ot_recognized_postal_country_name' ) ) {
+  function ot_recognized_postal_country_name($field_id = '')
+  {
+    return apply_filters('ot_recognized_postal_country_name', array(
+        'Afghanistan', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla', 'Antarctica (the territory South of 60 deg S)', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan',
+        'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island (Bouvetoya)', 'Brazil', 'British Indian Ocean Territory (Chagos Archipelago)', 'British Virgin Islands', 'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi',
+        'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo', 'Cook Islands', 'Costa Rica', 'Cote d\'Ivoire', 'Croatia', 'Cuba', 'Cyprus', 'Czech Republic',
+        'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic',
+        'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia',
+        'Faroe Islands', 'Falkland Islands (Malvinas)', 'Fiji', 'Finland', 'France', 'French Guiana', 'French Polynesia', 'French Southern Territories',
+        'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-Bissau', 'Guyana',
+        'Haiti', 'Heard Island and McDonald Islands', 'Holy See (Vatican City State)', 'Honduras', 'Hong Kong', 'Hungary',
+        'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy',
+        'Jamaica', 'Japan', 'Jersey', 'Jordan',
+        'Kazakhstan', 'Kenya', 'Kiribati', 'Korea', 'Korea', 'Kuwait', 'Kyrgyz Republic',
+        'Lao People\'s Democratic Republic', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libyan Arab Jamahiriya', 'Liechtenstein', 'Lithuania', 'Luxembourg',
+        'Macao', 'Macedonia', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar',
+        'Namibia', 'Nauru', 'Nepal', 'Netherlands Antilles', 'Netherlands', 'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island', 'Northern Mariana Islands', 'Norway',
+        'Oman',
+        'Pakistan', 'Palau', 'Palestinian Territory', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn Islands', 'Poland', 'Portugal', 'Puerto Rico',
+        'Qatar',
+        'Reunion', 'Romania', 'Russian Federation', 'Rwanda',
+        'Saint Barthelemy', 'Saint Helena', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Martin', 'Saint Pierre and Miquelon', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia (Slovak Republic)', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Georgia and the South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Svalbard & Jan Mayen Islands', 'Swaziland', 'Sweden', 'Switzerland', 'Syrian Arab Republic',
+        'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Timor-Leste', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu',
+        'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States of America', 'United States Minor Outlying Islands', 'United States Virgin Islands', 'Uruguay', 'Uzbekistan',
+        'Vanuatu', 'Venezuela', 'Vietnam',
+        'Wallis and Futuna', 'Western Sahara',
+        'Yemen',
+        'Zambia', 'Zimbabwe'), $field_id);
+  }
+}
 
 /* End of file ot-functions-admin.php */
 /* Location: ./includes/ot-functions-admin.php */

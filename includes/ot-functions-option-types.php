@@ -2185,6 +2185,79 @@ if ( ! function_exists( 'ot_type_sidebar_select' ) ) {
 }
 
 /**
+ * GravityForms Select option type.
+ *
+ * This option type makes it possible for users to select a WordPress registered GravityForm
+ * to use on a specific area. By using the two provided filters, 'ot_recognized_gravityforms',
+ * and 'ot_recognized_gravityforms_{$field_id}' we can be selective about which sidebars are
+ * available on a specific content area.
+ *
+ * For example, if we create a WordPress theme that provides the ability to change the
+ * Blog contact form and we don't want to have the footer form available on this area,
+ * we can unset those forms either manually or by using a regular expression if we
+ * have a common name like footer-form-$i.
+ *
+ * @param     array     An array of arguments.
+ * @return    string
+ *
+ * @access    public
+ * @since     2.1
+ */
+if ( ! function_exists( 'ot_type_gravityforms_select' ) ) {
+
+  function ot_type_gravityforms_select( $args = array() ) {
+
+    /* turns arguments array into variables */
+    extract( $args );
+
+    /* verify a description */
+    $has_desc = $field_desc ? true : false;
+
+    /* format setting outer wrapper */
+    echo '<div class="format-setting type-gravityforms-select ' . ( $has_desc ? 'has-desc' : 'no-desc' ) . '">';
+
+    /* description */
+    echo $has_desc ? '<div class="description">' . htmlspecialchars_decode( $field_desc ) . '</div>' : '';
+
+    /* format setting inner wrapper */
+    echo '<div class="format-setting-inner">';
+
+    /* build page select */
+    echo '<select name="' . esc_attr( $field_name ) . '" id="' . esc_attr( $field_id ) . '" class="option-tree-ui-select ' . $field_class . '">';
+
+    /* get the registered sidebars */
+    if (class_exists('RGFormsModel')) {
+      $forms = array();
+      foreach (RGFormsModel::get_forms(1, "title") as $form) {
+        $forms[$form->id] = $form->title;
+      }
+
+      /* filters to restrict which sidebars are allowed to be selected, for example we can restrict footer sidebars to be selectable on a blog page */
+      $forms = apply_filters('ot_recognized_gravityforms', $forms);
+      $forms = apply_filters('ot_recognized_gravityforms_' . $field_id, $forms);
+    }
+
+    /* has sidebars */
+    if ( count( $forms ) ) {
+      echo '<option value="">-- ' . __( 'Choose GravityForm', 'option-tree' ) . ' --</option>';
+      foreach ( $forms as $id => $form ) {
+        echo '<option value="' . esc_attr( $id ) . '"' . selected( $field_value, $id, false ) . '>' . esc_attr( $form ) . '</option>';
+      }
+    } else {
+      echo '<option value="">' . __( 'No GravityForms', 'option-tree' ) . '</option>';
+    }
+
+    echo '</select>';
+
+    echo '</div>';
+
+    echo '</div>';
+
+  }
+
+}
+
+/**
  * List Item option type.
  *
  * See @ot_display_by_type to see the full list of available arguments.
@@ -3149,6 +3222,88 @@ if ( ! function_exists( 'ot_type_typography' ) ) {
 }
 
 /**
+ * Postal Address option type.
+ *
+ * See @ot_display_by_type to see the full list of available arguments.
+ *
+ * @param     array     An array of arguments.
+ * @return    string
+ *
+ * @access    public
+ * @since     2.0
+ */
+if ( ! function_exists( 'ot_type_postal_address' ) ) {
+
+  function ot_type_postal_address( $args = array() ) {
+
+    /* turns arguments array into variables */
+    extract( $args );
+
+    /* verify a description */
+    $has_desc = $field_desc ? true : false;
+
+    /* format setting outer wrapper */
+    echo '<div class="format-setting type-postal-address ' . ( $has_desc ? 'has-desc' : 'no-desc' ) . '">';
+
+    /* description */
+    echo $has_desc ? '<div class="description">' . htmlspecialchars_decode( $field_desc ) . '</div>' : '';
+
+    /* format setting inner wrapper */
+    echo '<div class="format-setting-inner">';
+
+    /* allow fields to be filtered */
+    $ot_recognized_address_fields = apply_filters( 'ot_recognized_address_fields', array(
+        'street-address1',
+        'street-address2',
+        'locality',
+        'region',
+        'postal-code'
+    ), $field_id );
+
+    /* build first street address */
+    if ( in_array( 'street-address1', $ot_recognized_address_fields ) ) {
+      $street_address_1 = isset( $field_value['street-address1'] ) ? esc_attr( $field_value['street-address1'] ) : '';
+      echo '<input type="text" name="' . esc_attr( $field_name ) . '[street-address1]" id="' . esc_attr( $field_id ) . '-street-address1" value="' . esc_attr( $street_address_1 ) . '" class="widefat option-tree-ui-input ' . esc_attr( $field_class ) . '" placeholder="Street address">';
+    }
+
+    /* build second street address */
+    if ( in_array( 'street-address1', $ot_recognized_address_fields ) ) {
+      $street_address_2 = isset( $field_value['street-address2'] ) ? esc_attr( $field_value['street-address2'] ) : '';
+      echo '<input type="text" name="' . esc_attr( $field_name ) . '[street-address2]" id="' . esc_attr( $field_id ) . '-street-address2" value="' . esc_attr( $street_address_2 ) . '" class="widefat option-tree-ui-input ' . esc_attr( $field_class ) . '" placeholder="Street address">';
+    }
+
+    /* build locality */
+    if ( in_array( 'locality', $ot_recognized_address_fields ) ) {
+      $locality = isset( $field_value['locality'] ) ? esc_attr( $field_value['locality'] ) : '';
+      echo '<div class="ot-option-group ot-option-group--one-third"><input type="text" name="' . esc_attr( $field_name ) . '[locality]" id="' . esc_attr( $field_id ) . '-locality" value="' . esc_attr( $locality ) . '" class="widefat option-tree-ui-input ' . esc_attr( $field_class ) . '" placeholder="City or locality"></div>';
+    }
+
+    /* build region */
+    if ( in_array( 'region', $ot_recognized_address_fields ) ) {
+      $region = isset( $field_value['region'] ) ? esc_attr( $field_value['region'] ) : '';
+      echo '<div class="ot-option-group ot-option-group--one-third"><select name="' . esc_attr( $field_name ) . '[region]" id="' . esc_attr( $field_id ) . '-region" class="option-tree-ui-select ' . esc_attr( $field_class ) . '">';
+      echo '<option value="">Select a state</option>';
+      foreach ( ot_recognized_postal_regions( $field_id ) as $key => $value ) {
+        echo '<option value="' . esc_attr( $value ) . '" ' . selected( $region, $value, false ) . '>' . esc_attr( $value ) . '</option>';
+      }
+      echo '</select></div>';
+    }
+
+    /* build postal code */
+    if ( in_array( 'postal-code', $ot_recognized_address_fields ) ) {
+      $postal_code = isset( $field_value['postal-code'] ) ? esc_attr( $field_value['postal-code'] ) : '';
+      echo '<div class="ot-option-group ot-option-group--one-third ot-option-group--is-last"><input type="text" name="' . esc_attr( $field_name ) . '[postal-code]" id="' . esc_attr( $field_id ) . '-postal-code" value="' . esc_attr( $postal_code ) . '" class="widefat option-tree-ui-input ' . esc_attr( $field_class ) . '" placeholder="Postal code"></div>';
+    }
+
+    echo '</div>';
+
+    echo '</div>';
+
+  }
+
+}
+
+/**
  * Upload option type.
  *
  * See @ot_display_by_type to see the full list of available arguments.
@@ -3225,6 +3380,88 @@ if ( ! function_exists( 'ot_type_upload' ) ) {
     
     echo '</div>';
     
+  }
+
+  /**
+   * Phone Number Option Type.
+   *
+   * See @ot_display_by_type to see the full list of available arguments.
+   *
+   * @param     array     An array of arguments.
+   * @return    string
+   *
+   * @access    public
+   * @since     2.5.0
+   */
+  if ( ! function_exists( 'ot_type_phone_number' ) ) {
+
+    function ot_type_phone_number( $args = array() ) {
+
+      /* turns arguments array into variables */
+      extract( $args );
+
+      /* verify a description */
+      $has_desc = $field_desc ? true : false;
+
+      /* format setting outer wrapper */
+      echo '<div class="format-setting type-phone_number ' . ( $has_desc ? 'has-desc' : 'no-desc' ) . '">';
+
+      /* description */
+      echo $has_desc ? '<div class="description">' . htmlspecialchars_decode( $field_desc ) . '</div>' : '';
+
+      /* format setting inner wrapper */
+      echo '<div class="format-setting-inner">';
+
+      /* allow fields to be filtered */
+      $ot_recognized_phone_number_fields = apply_filters( 'ot_recognized_phone_number_fields', array(
+          'number',
+          'extension',
+          'type',
+      ), $field_id );
+
+      /* build phone number number */
+      if ( in_array( 'number', $ot_recognized_phone_number_fields ) ) {
+
+        $number = isset( $field_value['number'] ) ? esc_attr( $field_value['number'] ) : '';
+
+        echo '<div class="ot-option-group ot-option-group--one-third"><input type="text" name="' . esc_attr( $field_name ) . '[number]" id="' . esc_attr( $field_id ) . '-number" value="' . $number . '" class="widefat option-tree-ui-input ' . esc_attr( $field_class ) . '" placeholder="' . __( 'number', 'option-tree' ) . '" /></div>';
+
+      }
+
+      /* build phone number extension */
+      if ( in_array( 'extension', $ot_recognized_phone_number_fields ) ) {
+
+        $extension = isset( $field_value['extension'] ) ? esc_attr( $field_value['extension'] ) : '';
+
+        echo '<div class="ot-option-group ot-option-group--one-third"><input type="text" name="' . esc_attr( $field_name ) . '[extension]" id="' . esc_attr( $field_id ) . '-extension" value="' . $extension . '" class="widefat option-tree-ui-input ' . esc_attr( $field_class ) . '" placeholder="' . __( 'extension', 'option-tree' ) . '" /></div>';
+
+      }
+
+      /* build phone number type dropdown */
+      if ( in_array( 'type', $ot_recognized_phone_number_fields ) ) {
+
+        echo '<div class="ot-option-group ot-option-group--one-third ot-option-group--is-last">';
+
+        echo '<select name="' . esc_attr( $field_name ) . '[type]" id="' . esc_attr( $field_id ) . '-type" class="option-tree-ui-select ' . esc_attr( $field_class ) . '">';
+
+        echo '<option value="">' . __( 'type', 'option-tree' ) . '</option>';
+
+        foreach ( ot_recognized_phone_number_types( $field_id ) as $unit ) {
+          echo '<option value="' . esc_attr( $unit ) . '"' . ( isset( $field_value['type'] ) ? selected( $field_value['type'], $unit, false ) : '' ) . '>' . esc_attr( $unit ) . '</option>';
+        }
+
+        echo '</select>';
+
+        echo '</div>';
+
+      }
+
+      echo '</div>';
+
+      echo '</div>';
+
+    }
+
   }
   
 }
